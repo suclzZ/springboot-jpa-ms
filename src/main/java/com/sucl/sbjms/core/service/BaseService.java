@@ -1,0 +1,47 @@
+package com.sucl.sbjms.core.service;
+
+import com.sucl.sbjms.core.orm.Condition;
+import com.sucl.sbjms.core.orm.Order;
+import com.sucl.sbjms.core.orm.Pager;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
+
+/**
+ * @author sucl
+ * @date 2019/4/1
+ */
+public interface BaseService<R ,T> {//extends JpaRepository<T,Serializable>
+
+    T getById(Serializable id);
+
+    T getOne(String property,Object value);
+
+    List<T> getAll(Collection<Condition> conditions);
+
+    List<T> getAll(T t);
+
+    Pager<T> getPager(Pager pager,Collection<Condition> conditions,Collection<Order> orders);
+
+    T save(T t);
+
+    void saveBatch(Collection<T> ts);
+
+    T updateById(T t);
+
+    T saveOrUpdate(T t);
+
+    void deleteById(Serializable id);
+
+    void delete(String property,Object value);
+
+    void delete(T t);
+
+    void deleteAll(Collection<T> ts);
+
+    boolean exist(Serializable id);
+
+    boolean exist(T t);
+}
