@@ -5,7 +5,6 @@ import com.sucl.sbjms.core.orm.Order;
 import com.sucl.sbjms.core.orm.Pager;
 import com.sucl.sbjms.core.service.BaseService;
 import com.sucl.sbjms.core.util.ConditionHelper;
-import com.sucl.sbjms.system.entity.User;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -59,7 +58,6 @@ public abstract class BaseServiceImpl<R extends Repository<T,Serializable>,T> im
 
     @Override
     public List<T> getAll(Collection<Condition> conditions) {
-//        return repository.findAll(ConditionHelper.buildExample(getDomainClazz(),conditions));
         return specificationExecutor.findAll(ConditionHelper.buildSpecification(conditions));
     }
 
@@ -70,7 +68,6 @@ public abstract class BaseServiceImpl<R extends Repository<T,Serializable>,T> im
 
     @Override
     public Pager<T> getPager(Pager pager, Collection<Condition> conditions, Collection<Order> orders) {
-//        Example<T> example = ConditionHelper.buildExample(getDomainClazz(),conditions);
         Pageable pageable = new PageRequest(pager.getPageIndex(),pager.getPageSize(),ConditionHelper.buildSort(orders));
         specificationExecutor.findAll(ConditionHelper.buildSpecification(conditions),pageable);
         return null;

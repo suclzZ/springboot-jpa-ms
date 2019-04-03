@@ -3,7 +3,6 @@ package com.sucl.sbjms.core.service;
 import com.sucl.sbjms.core.orm.Condition;
 import com.sucl.sbjms.core.orm.Order;
 import com.sucl.sbjms.core.orm.Pager;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -13,7 +12,7 @@ import java.util.List;
  * @author sucl
  * @date 2019/4/1
  */
-public interface BaseService<R ,T> {//extends JpaRepository<T,Serializable>
+public interface BaseService<R ,T> {
 
     T getById(Serializable id);
 
