@@ -5,6 +5,7 @@ import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.util.Date;
 
 /**
  * @Temporal
@@ -51,6 +52,9 @@ public class User implements Domain {
 
     @Column(name = "address",length = 128)
     private String address;
+
+    @Column(name = "create_date")
+    private Date createDate;
 
     @Column(name = "description",length = 256)
     private String description;

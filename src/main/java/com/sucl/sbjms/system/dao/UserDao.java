@@ -12,7 +12,7 @@ import java.io.Serializable;
  * @author sucl
  * @date 2019/4/1
  */
-@RepositoryRestResource(path="user")
+//@RepositoryRestResource(path="user")
 @Repository
 public interface UserDao extends JpaRepository<User,Serializable>,JpaSpecificationExecutor<User>,
         org.springframework.data.repository.Repository<User,Serializable>{

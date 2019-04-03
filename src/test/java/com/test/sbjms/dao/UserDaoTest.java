@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.annotation.Resource;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +30,7 @@ public class UserDaoTest extends Test {
 
     @org.junit.Test
     public void test(){
-        t3();
+        t4();
     }
 
     public void t1(){
@@ -80,6 +82,18 @@ public class UserDaoTest extends Test {
 //        conds.add(new JpaCondition("agency.agencyId","3"));
 //        conds.add(new JpaCondition("agency.agencyCode","003"));
 //        conds.add(new JpaCondition("agency.company.companyId","c2"));// 二级关联查询，还没解决
+        List<User> users = userService.getAll(conds);
+        System.out.println(users);
+    }
+
+    public void t4() {
+        List<Condition> conds = new ArrayList<>();
+        try {
+            new SimpleDateFormat("yyyy-MM-dd").parse("2019-04-02");
+            conds.add(new JpaCondition("createDate", Condition.Opt.GT,"2019-04-02"));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         List<User> users = userService.getAll(conds);
         System.out.println(users);
     }

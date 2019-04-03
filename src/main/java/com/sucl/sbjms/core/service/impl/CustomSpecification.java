@@ -4,11 +4,8 @@ import com.sucl.sbjms.core.orm.Condition;
 import com.sucl.sbjms.core.orm.OrCondition;
 import com.sucl.sbjms.core.rem.BusException;
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections.set.PredicatedSet;
 import org.hibernate.jpa.internal.metamodel.EntityTypeImpl;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.persistence.criteria.*;
@@ -175,16 +172,17 @@ public class CustomSpecification<T> implements Specification {
                     predicate = criteriaBuilder.isNotNull(path.as(String.class));
                     break;
                 case GT:
-                    predicate = criteriaBuilder.greaterThan(path,value.toString());
+                    //处理具体类型进行比较，目前全部转换为string
+                    predicate = criteriaBuilder.greaterThan(path.as(String.class),value.toString());
                     break;
                 case GE:
-                    predicate = criteriaBuilder.greaterThanOrEqualTo(path,value.toString());
+                    predicate = criteriaBuilder.greaterThanOrEqualTo(path.as(String.class),value.toString());
                     break;
                 case LT:
-                    predicate = criteriaBuilder.lessThan(path,value.toString());
+                    predicate = criteriaBuilder.lessThan(path.as(String.class),value.toString());
                     break;
                 case LE:
-                    predicate = criteriaBuilder.lessThanOrEqualTo(path,value.toString());
+                    predicate = criteriaBuilder.lessThanOrEqualTo(path.as(String.class),value.toString());
                     break;
                 case LIKE:
                     predicate = criteriaBuilder.like(path.as(String.class),"%"+value.toString()+"%");
