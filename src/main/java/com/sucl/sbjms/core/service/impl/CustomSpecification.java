@@ -2,80 +2,111 @@ package com.sucl.sbjms.core.service.impl;
 
 import com.sucl.sbjms.core.orm.Condition;
 import com.sucl.sbjms.core.orm.OrCondition;
-import org.apache.commons.collections.CollectionUtils;
-import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.engine.spi.TypedValue;
+import com.sucl.sbjms.core.rem.BusException;
+import lombok.NoArgsConstructor;
+import org.apache.commons.collections.set.PredicatedSet;
 import org.hibernate.jpa.internal.metamodel.EntityTypeImpl;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.domain.Specifications;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import javax.persistence.criteria.*;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
  * 配合JpaSpecificationExecutor接口实现多条件查询
- * 关联查询
- * 嵌套查询
+ * 关联查询？ join 只支持一级关联查询，超过的有问题，目前没找到原因
+ * 嵌套查询？ () and/or () 不支持
  * @author sucl
  * @date 2019/4/1
  */
+@NoArgsConstructor
 public class CustomSpecification<T> implements Specification {
     private Collection<Condition> conditions;
     private Map<String,Set<String>> entityField = new HashMap<>();//ConcurrentHashMap<>();
     private Map<String,Attribute> entityAttribute = new HashMap<>();
-
-    public CustomSpecification(){}
+    private Map<String,Join> joinMap = new HashMap<>();
+    private boolean andOr = true;//true:and false:or
 
     public CustomSpecification(Collection<Condition> conditions){
         this.conditions = conditions;
     }
+    public CustomSpecification(Collection<Condition> conditions,boolean andOr){
+        this.conditions = conditions;
+        this.andOr = andOr;
+    }
 
+    /**
+     * or and同时发生，无法在一次条件中即构建or又构建and，只能通过嵌套实现
+     * @param root
+     * @param query
+     * @param criteriaBuilder
+     * @return
+     */
     @Override
     public Predicate toPredicate(Root root, CriteriaQuery query, CriteriaBuilder criteriaBuilder) {
         List<Predicate> predicates = new ArrayList<>();
+        List<Boolean> ors = null;
         if(conditions!=null){
-            conditions.stream().forEach(c->{
-                boolean or = OrCondition.class.isAssignableFrom(c.getClass());//是否or
-                boolean use = false;
-                if(isProperty(root,c)){
-                    use = true;
+            ors = conditions.stream().map(c->{
+                Predicate predicate = createPredicate(root, query, criteriaBuilder, c);
+                if(predicate!=null){
+                    predicates.add( predicate );
                 }
-                if(isRelateProperty(c)){
-                    Class clazz = getRelationClazz(root,c);
-                    if(clazz !=null){
-                        CriteriaQuery relQuery = criteriaBuilder.createQuery(clazz);
-                        Subquery subquery = relQuery.subquery(clazz);
-                        Root subRoot = subquery.from(clazz);
-                        subquery.select(subRoot);
-                        Predicate subPredicate = criteriaBuilder.and(predicate(criteriaBuilder, subRoot, c));;
-                        subquery.where(subPredicate);
-                    }
-                }
-                if(use){
-                    if(!or){
-                        predicates.add(criteriaBuilder.and(predicate(criteriaBuilder,root,c)) );
-                    }else{
-
-                    }
-                }
-            });
+                return OrCondition.class.isAssignableFrom(c.getClass());//记录每个条件是or还是and
+            }).collect(Collectors.toList());
         }
-//        query.subquery();
-//        return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+//        List<Predicate> orPredicates = new ArrayList<>();
+//        List<Predicate> andPredicates = new ArrayList<>();
+//        for(int i=0;i<predicates.size();i++){
+//            if(ors.get(i)){
+//                orPredicates.add( criteriaBuilder.or(predicates.get(i)) );
+//            }else{
+//                andPredicates.add( criteriaBuilder.and(predicates.get(i)) );
+//            }
+//        }
+//        Predicate p1 = criteriaBuilder.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
+//        Predicate p2 = criteriaBuilder.and(andPredicates.toArray(new Predicate[andPredicates.size()]));
+        return andOr? criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()])):criteriaBuilder.or(predicates.toArray(new Predicate[predicates.size()]));
 //        return query.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
-        return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+    }
+
+    private Predicate createPredicate(Root root, CriteriaQuery query, CriteriaBuilder criteriaBuilder, Condition cond){
+        if(isProperty(root,cond)){
+            return predicate(criteriaBuilder,root,cond);
+        }
+        if(isRelateProperty(cond)){
+            Class clazz = getRelationClazz(root,cond);
+            Root relRoot = criteriaBuilder.createQuery(clazz).from(clazz);
+            if(clazz !=null){
+                String relTable = clazz.getSimpleName().toLowerCase();
+                Join join;
+                if( (join = joinMap.get(relTable))==null){
+                    join = root.join(clazz.getSimpleName().toLowerCase(), JoinType.LEFT);//
+                    joinMap.put(relTable,join);
+                }
+                if(isProperty(relRoot,cond)){
+                    return joinPredicate(criteriaBuilder, join, cond);
+                }
+                //二级关联left join一直加不上去
+                return createPredicate(relRoot,query,criteriaBuilder,cond);
+            }
+        }
+        return null;
     }
 
     private Class getRelationClazz(Root root, Condition c) {
         String[] props = c.getProperty().split("\\.");
+        int firstIndex = c.getProperty().indexOf(".");
+        String left = c.getProperty().substring(0,firstIndex);//props[0]
+        String right = c.getProperty().substring(firstIndex+1);//props[1]
         String entityClassName = ((EntityTypeImpl) root.getModel()).getTypeName();
-        Attribute attr = entityAttribute.get(entityClassName + "." + props[0]);
-        c.setProperty(props[1]);
+        Attribute attr = entityAttribute.get(entityClassName + "." + left);
+        c.setProperty(right);
         return attr.getJavaType();
     }
 
@@ -109,6 +140,10 @@ public class CustomSpecification<T> implements Specification {
      */
     private boolean isRelateProperty(Condition c) {
         if(c!=null && c.getProperty().indexOf(".")!=-1){
+            int count = StringUtils.countOccurrencesOf(c.getProperty(),".");
+            if(count>=3){
+                throw new BusException(String.format("join query level is %s,don'tsupport!",count));
+            }
             return true;
         }
         return false;
@@ -116,55 +151,59 @@ public class CustomSpecification<T> implements Specification {
 
 
     private Predicate predicate(CriteriaBuilder criteriaBuilder,Root<T> root, Condition condition){
-        String property = condition.getProperty();
-        Condition.Opt operate = condition.getOperate();
-        Object value = condition.getValue();
+        return compare(root.get(condition.getProperty()),condition.getOperate(),condition.getValue(),criteriaBuilder);
+    }
+
+    private Predicate joinPredicate(CriteriaBuilder criteriaBuilder,Join join, Condition condition){
+        return compare(join.get(condition.getProperty()),condition.getOperate(),condition.getValue(),criteriaBuilder);
+    }
+
+    private Predicate compare(Path path,Condition.Opt operate,Object value,CriteriaBuilder criteriaBuilder){
         Predicate predicate = null;
-        //校验property是否合法
         if(value!=null){
             switch (operate){
                 case EQ:
-                    predicate = criteriaBuilder.equal(root.get(property).as(String.class),value);
+                    predicate = criteriaBuilder.equal(path.as(String.class),value);
                     break;
                 case NQ:
-                    predicate = criteriaBuilder.notEqual(root.get(property).as(String.class),value);
+                    predicate = criteriaBuilder.notEqual(path.as(String.class),value);
                     break;
                 case IS_NULL:
-                    predicate = criteriaBuilder.isNull(root.get(property).as(String.class));
+                    predicate = criteriaBuilder.isNull(path.as(String.class));
                     break;
                 case NOT_NULL:
-                    predicate = criteriaBuilder.isNotNull(root.get(property).as(String.class));
+                    predicate = criteriaBuilder.isNotNull(path.as(String.class));
                     break;
                 case GT:
-                    predicate = criteriaBuilder.greaterThan(root.get(property),value.toString());
+                    predicate = criteriaBuilder.greaterThan(path,value.toString());
                     break;
                 case GE:
-                    predicate = criteriaBuilder.greaterThanOrEqualTo(root.get(property),value.toString());
+                    predicate = criteriaBuilder.greaterThanOrEqualTo(path,value.toString());
                     break;
                 case LT:
-                    predicate = criteriaBuilder.lessThan(root.get(property),property.toString());
+                    predicate = criteriaBuilder.lessThan(path,value.toString());
                     break;
                 case LE:
-                    predicate = criteriaBuilder.lessThanOrEqualTo(root.get(property),value.toString());
+                    predicate = criteriaBuilder.lessThanOrEqualTo(path,value.toString());
                     break;
                 case LIKE:
-                    predicate = criteriaBuilder.like(root.get(property).as(String.class),"%"+value.toString()+"%");
+                    predicate = criteriaBuilder.like(path.as(String.class),"%"+value.toString()+"%");
                     break;
                 case LEFT_LIKE:
-                    predicate = criteriaBuilder.like(root.get(property).as(String.class),value.toString()+"%");
+                    predicate = criteriaBuilder.like(path.as(String.class),value.toString()+"%");
                     break;
                 case RIGHT_LIKE:
-                    predicate = criteriaBuilder.like(root.get(property).as(String.class),"%"+value.toString());
+                    predicate = criteriaBuilder.like(path.as(String.class),"%"+value.toString());
                     break;
                 case BWT:
                     String[] values = value.toString().trim().split(",|，");
-                    assert values.length!=2:"the format of value:"+value+" do not be supported,must contain ','";
-                    predicate = criteriaBuilder.between(root.get(property),values[0],values[1]);
+                    assert values.length!=2:"the format of value:"+value+" do not be supported,must contain ',' or '，'";
+                    predicate = criteriaBuilder.between(path,values[0],values[1]);
                     break;
                 case IN:
                     String[] value2s = value.toString().trim().split(",");
                     if(value2s!=null && value2s.length>0){
-                        CriteriaBuilder.In<Object> in = criteriaBuilder.in(root.get(property));
+                        CriteriaBuilder.In<Object> in = criteriaBuilder.in(path);
                         for(String inVal : value2s){
                             in.value(inVal);
                         }
@@ -177,10 +216,10 @@ public class CustomSpecification<T> implements Specification {
             }
         }else{
             if(operate == Condition.Opt.EQ || operate == Condition.Opt.IS_NULL){
-                predicate = criteriaBuilder.isNull(root.get(property).as(String.class));
+                predicate = criteriaBuilder.isNull(path.as(String.class));
             }
             if(operate == Condition.Opt.NQ || operate == Condition.Opt.NOT_NULL){
-                predicate = criteriaBuilder.isNotNull(root.get(property).as(String.class));
+                predicate = criteriaBuilder.isNotNull(path.as(String.class));
             }
         }
         return predicate;

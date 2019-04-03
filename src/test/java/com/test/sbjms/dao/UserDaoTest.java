@@ -3,6 +3,7 @@ package com.test.sbjms.dao;
 import com.sucl.sbjms.core.orm.Condition;
 import com.sucl.sbjms.core.orm.jpa.JpaCondition;
 import com.sucl.sbjms.core.orm.jpa.JpaOrCondition;
+import com.sucl.sbjms.core.orm.jpa.NestedCondition;
 import com.sucl.sbjms.core.service.impl.CustomSpecification;
 import com.sucl.sbjms.system.dao.UserDao;
 import com.sucl.sbjms.system.entity.User;
@@ -71,8 +72,14 @@ public class UserDaoTest extends Test {
         List<Condition> conds = new ArrayList<>();
         conds.add(new JpaCondition("userId","1"));
         conds.add(new JpaOrCondition("username","tom"));
-        conds.add(new JpaCondition("age","26"));
-        conds.add(new JpaCondition("agency.agencyId","1"));
+        conds.add(new JpaCondition("age",Condition.Opt.LE,"26"));
+
+        NestedCondition nestedCondition = new NestedCondition(new JpaCondition("userId","2"),new JpaCondition("username","abc"));
+        conds.add(nestedCondition);
+
+//        conds.add(new JpaCondition("agency.agencyId","3"));
+//        conds.add(new JpaCondition("agency.agencyCode","003"));
+//        conds.add(new JpaCondition("agency.company.companyId","c2"));// 二级关联查询，还没解决
         List<User> users = userService.getAll(conds);
         System.out.println(users);
     }

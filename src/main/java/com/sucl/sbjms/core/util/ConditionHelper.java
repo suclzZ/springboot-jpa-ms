@@ -2,6 +2,7 @@ package com.sucl.sbjms.core.util;
 
 import com.sucl.sbjms.core.orm.Condition;
 import com.sucl.sbjms.core.orm.Order;
+import com.sucl.sbjms.core.orm.jpa.NestedCondition;
 import com.sucl.sbjms.core.rem.BusException;
 import com.sucl.sbjms.core.service.impl.CustomSpecification;
 import org.apache.commons.beanutils.PropertyUtils;
@@ -10,14 +11,17 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.domain.Specifications;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 /**
  * 将condition转换成jpa查询需要的对象 Specification
+ *
  * Example: 仅能对字符串做处理，
  *  DEFAULT (case-sensitive)	firstname = ?0	默认（大小写敏感）
  * DEFAULT (case-insensitive)	LOWER(firstname) = LOWER(?0)	默认（忽略大小写）
@@ -132,12 +136,37 @@ public class ConditionHelper {
 
     /**
      * Specification
+     * 当属于and时有没括号都一样，所以括号对应的是specifications内容为or关系的数据
+     *
      * @param conditions
      * @param <T>
      * @return
      */
     public static <T> Specification<T> buildSpecification(Collection<Condition> conditions){
-        return new CustomSpecification<T>(conditions);
+//        Specifications.where();
+        List<Specification> specifications = new ArrayList<>();
+        List<Condition> unNestedConditions = new ArrayList<>();
+        if(conditions!=null){
+            conditions.stream().forEach(cond->{
+                if(cond instanceof NestedCondition){
+                    //通过某种策略决定是or 还是 and
+                    specifications.add( new CustomSpecification<T>( Arrays.asList(((NestedCondition) cond).getConditions()) ));
+                }else{
+                    unNestedConditions.add(cond);
+                }
+            });
+        }
+        specifications.add(new CustomSpecification(unNestedConditions));
+        Specifications specification = null;
+        for(int i=0;i<specifications.size();i++){
+            if(specification==null){
+                specification = Specifications.where(specifications.get(i));
+            }else{
+                specification = specification.and(specifications.get(i));
+            }
+        }
+//        return new CustomSpecification(conditions);
+        return specification;
     }
 
     /**

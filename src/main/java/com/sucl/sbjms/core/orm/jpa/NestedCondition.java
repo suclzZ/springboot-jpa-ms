@@ -11,25 +11,14 @@ import org.hibernate.criterion.Restrictions;
  */
 public class NestedCondition implements Condition {
 
-    private JpaCondition condition1;
-    private JpaCondition condition2;
+    private JpaCondition[] conditions;
 
-    public NestedCondition(JpaCondition condition1, JpaCondition condition2) {
-        this.condition1 = condition1;
-        this.condition2 = condition2;
+    public NestedCondition(JpaCondition... conditions) {
+        this.conditions = conditions;
     }
 
-    public Criterion generateExpression() {
-        return Restrictions.or(convertToCriterion(this.condition1), convertToCriterion(this.condition1));
-    }
-
-    private Criterion convertToCriterion(Condition condition) {
-        if( condition instanceof JpaCondition ){
-            return ((JpaCondition) condition).generateExpression(null);
-        }else if(condition instanceof NestedCondition){
-            return ((NestedCondition) condition).generateExpression();
-        }
-        return null;
+    public JpaCondition[] getConditions() {
+        return conditions;
     }
 
     @Override

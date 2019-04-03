@@ -1,5 +1,7 @@
 package com.sucl.sbjms.core.orm;
 
+import java.util.Collection;
+
 /**
  * @author sucl
  * @date 2019/4/1

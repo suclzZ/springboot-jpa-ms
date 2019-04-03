@@ -7,6 +7,9 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 
 /**
+ * @Temporal
+ * @Transient
+ *
  * @author sucl
  * @date 2019/4/1
  */
@@ -21,7 +24,7 @@ public class User implements Domain {
     @GeneratedValue(generator = "uuid")
     private String userId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agency_id")
     private Agency agency;
 
