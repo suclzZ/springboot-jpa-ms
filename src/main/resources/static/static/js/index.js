@@ -13,7 +13,7 @@
             // main : 'main',
             // dialog :'dialog',
             // menu : 'menu'
-            config:'{/}config'
+            app:'../../../app'
         };
 
     (function(){
