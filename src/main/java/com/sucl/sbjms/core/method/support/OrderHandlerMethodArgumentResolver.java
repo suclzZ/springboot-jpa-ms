@@ -1,6 +1,6 @@
 package com.sucl.sbjms.core.method.support;
 
-import com.sucl.sbjms.core.annotation.QueryOrder;
+import com.sucl.sbjms.core.method.annotation.QueryOrder;
 import com.sucl.sbjms.core.orm.jpa.JpaOrder;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;

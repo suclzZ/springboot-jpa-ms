@@ -2,7 +2,7 @@ package com.sucl.sbjms.core.method.support;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sucl.sbjms.core.annotation.QueryCondition;
+import com.sucl.sbjms.core.method.annotation.QueryCondition;
 import com.sucl.sbjms.core.orm.Condition;
 import com.sucl.sbjms.core.orm.Domain;
 import com.sucl.sbjms.core.orm.jpa.JpaCondition;

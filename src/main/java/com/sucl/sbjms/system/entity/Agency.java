@@ -22,10 +22,6 @@ public class Agency implements Domain {
     @GeneratedValue(generator = "uuid")
     private String agencyId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id")
-    private Company company;
-
     @Column(name = "agency_code",length = 16)
     private String agencyCode;
 
