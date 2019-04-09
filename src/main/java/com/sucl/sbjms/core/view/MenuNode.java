@@ -17,7 +17,7 @@ public class MenuNode implements TreeNode{
     private String cls;
     private String link;
     private boolean leaf;
-    private List<MenuNode> children;
+    private List<TreeNode> children;
 
     public void add(MenuNode menuNode) {
         if(children==null){
@@ -37,11 +37,16 @@ public class MenuNode implements TreeNode{
 
     @Override
     public boolean isSpread() {
-        return leaf;
+        return !leaf;
     }
 
     @Override
     public String getHref() {
-        return link;
+        return null;
+    }
+
+    @Override
+    public List<TreeNode> getChildren() {
+        return children;
     }
 }

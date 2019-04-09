@@ -14,52 +14,33 @@
 
 <body>
     <div id="content-codeitem" class="page-content-wrap">
-        <div id="layer_add" class="layui-card" style="display: none">
-            <form class="layui-form layui-card-body" lay-filter="filter_form_add">
+        <div id="layer_addgroup" class="layui-card" style="display: none">
+            <form class="layui-form layui-card-body" lay-filter="filter_form_addgroup">
                 <div class="layui-form-item layui-hide">
                     <label class="layui-form-label">ID</label>
                     <div class="layui-input-block">
-                        <input type="text" name="id" autocomplete="off" class="layui-input">
+                        <input type="text" name="groupId" autocomplete="off" class="layui-input">
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">用户名</label>
+                    <label class="layui-form-label">组编码</label>
                     <div class="layui-input-block">
-                        <input type="text" name="name" lay-verify="required" placeholder="用户名" autocomplete="off"
+                        <input type="text" name="groupName" lay-verify="required" placeholder="组编码" autocomplete="off"
                             class="layui-input">
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">年龄</label>
+                    <label class="layui-form-label">组名称</label>
                     <div class="layui-input-block">
-                        <input type="text" name="age" placeholder="年龄" lay-verify="number" autocomplete="off"
+                        <input type="text" name="groupCaption" placeholder="组名称" autocomplete="off"
                             class="layui-input">
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">性别</label>
+                    <label class="layui-form-label">组类型</label>
                     <div class="layui-input-block">
-                        <input type="radio" name="sex" value="1" title="男" checked="">
-                        <input type="radio" name="sex" value="0" title="女">
-                    </div>
-                </div>
-                <div class="layui-form-item">
-                    <label class="layui-form-label">生日</label>
-                    <div class="layui-input-block">
-                        <input type="text" name="birth" placeholder="请输入" autocomplete="off"
-                            class="layui-input layui-date">
-                    </div>
-                </div>
-                <div class="layui-form-item">
-                    <label class="layui-form-label">电话号码</label>
-                    <div class="layui-input-block">
-                        <input type="text" name="tel" placeholder="请输入" autocomplete="off" class="layui-input">
-                    </div>
-                </div>
-                <div class="layui-form-item layui-form-text">
-                    <label class="layui-form-label">地址</label>
-                    <div class="layui-input-block">
-                        <textarea name="addr" placeholder="地址" class="layui-textarea"></textarea>
+                        <input type="radio" name="groupType" value="01" title="数据集" checked="">
+                        <input type="radio" name="groupType" value="02" title="Sql集">
                     </div>
                 </div>
                 <div class="layui-input-block layui-hide">
@@ -72,7 +53,7 @@
             <form class="layui-form" action="">
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <input type="text" name="title" required lay-verify="required" placeholder="请输入标题"
+                        <input type="text" name="groupCaption" required lay-verify="required" placeholder="请输入组名称"
                             autocomplete="off" class="layui-input">
                     </div>
                     <button class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="search"><i
@@ -90,16 +71,6 @@
             </script>
         </div>
         <div class="layui-form">
-            <form class="layui-form" action="">
-                <div class="layui-form-item">
-                    <div class="layui-inline">
-                        <input type="text" name="title" required lay-verify="required" placeholder="请输入标题"
-                            autocomplete="off" class="layui-input">
-                    </div>
-                    <button class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="search"><i
-                            class="layui-icon layui-icon-search"></i>搜索</button>
-                </div>
-            </form>
             <table id="table_codeitem" lay-filter="filter_table_codeitem" class="layui-table" lay-skin="line">
             </table>
             <script type="text/html" id="toolbar_codeitem">
@@ -115,11 +86,11 @@
     <script src="../static/layui/layui.js" type="text/javascript" charset="utf-8"></script>
     <script src="../static/js/index.js" data-main="main" type="text/javascript" charset="utf-8"></script>
     <script>
-        layui.use(['layer', 'table', 'form'], function () {
+        layui.use(['layer', 'table', 'form','app'], function () {
             var layer = layui.layer,
                 table = layui.table,
                 form = layui.form,
-                $ = layui.$;
+                $ = layui.$,app=layui.app;
 
             //列表加载数据
             table.render({
@@ -129,9 +100,8 @@
                 cols: [
                     [
                         {
-                            field: 'id',
+                            field: 'groupId',
                             title: 'ID',
-                            width: 100,
                             hide: true
                         },
                         {
@@ -140,13 +110,13 @@
                             width: '25%'
                         },
                         {
-                            field: 'groupType',
-                            title: '组类型',
+                            field: 'groupCaption',
+                            title: '组描述',
                             width: '25%'
                         },
                         {
-                            field: 'groupCaption',
-                            title: '组描述',
+                            field: 'groupType',
+                            title: '组类型',
                             width: '30%'
                         },
                         {
@@ -155,33 +125,42 @@
                         }
                     ]
                 ],
-                url: '../data/codeitem.json',
+                url: app.contextPath+'/codegroup',
                 page: true,
                 limit: 8,
                 limits: 8,
                 defaultToolbar:null,
+                request: {
+                    pageName: 'pager:pageIndex', //页码的参数名称，默认：page
+                    limitName: 'pager:pageSize' //每页数据量的参数名，默认：limit
+                },
+                response: {
+                    // statusName: 'status', //规定数据状态的字段名称，默认：code
+                    statusCode: 'OK', //规定成功的状态码，默认：0
+                },
                 parseData: function (res) { //res 即为原始返回的数据
                     return {
-                        "code": res.page.code, //解析接口状态
-                        "msg": res.page.msg, //解析提示文本
-                        "count": res.page.count, //解析数据长度
-                        "data": res.page.data //解析数据列表
+                        "code": res.status, //解析接口状态
+                        "msg": res.info, //解析提示文本
+                        "count": res.result.total, //解析数据长度
+                        "data": res.result.result //解析数据列表
                     };
                 }
             });
             table.render({
+                id:'table_codeitem',
                 elem: '#table_codeitem',
                 title:'代码项',
                 toolbar: '#toolbar_codeitem',
                 cols: [
                     [
                         {
-                            field: 'id',
+                            field: 'itemId',
                             title: 'ID',
                             hide: true
                         },
                         {
-                            field: 'gId',
+                            field: 'groupId',
                             title: 'groupId',
                             hide: true
                         },
@@ -192,12 +171,12 @@
                         },
                         {
                             field: 'itemName',
-                            title: '组名称',
+                            title: '项名称',
                             width: '25%'
                         },
                         {
                             field: 'itemType',
-                            title: '组类型',
+                            title: '项类型',
                             width: '30%'
                         },
                         {
@@ -206,42 +185,46 @@
                         }
                     ]
                 ],
-                url: '../data/codeitem.json',
                 page: true,
                 limit: 8,
-                limits: 8,
+                // limits: 8,
                 defaultToolbar:null,
+                request: {
+                    pageName: 'pager:pageIndex', //页码的参数名称，默认：page
+                    limitName: 'pager:pageSize' //每页数据量的参数名，默认：limit
+                },
+                response: {
+                    // statusName: 'status', //规定数据状态的字段名称，默认：code
+                    statusCode: 'OK', //规定成功的状态码，默认：0
+                },
                 parseData: function (res) { //res 即为原始返回的数据
                     return {
-                        "code": res.page.code, //解析接口状态
-                        "msg": res.page.msg, //解析提示文本
-                        "count": res.page.count, //解析数据长度
-                        "data": res.page.data //解析数据列表
+                        "code": res.status, //解析接口状态
+                        "msg": res.info, //解析提示文本
+                        "count": res.result.total, //解析数据长度
+                        "data": res.result.result //解析数据列表
                     };
                 }
             });
             //工具栏
-            table.on('toolbar(filter_table_codeitem)', function (obj) {
+            table.on('toolbar(filter_table_codegroup)', function (obj) {
                 switch (obj.event) {
                     case 'add':
-                        // layer.msg('添加');
-                        openForm();
-                        // main.addTab('codeitem-add.html');
-                        break;
-                    case 'delete':
-                        layer.msg('删除');
-                        break;
-                    case 'update':
-                        layer.msg('编辑');
+                        openGroupForm();
                         break;
                 };
             });
-            table.on('row(test)', function (obj) {
-                //obj.tr、obj.data
-                //obj.del(); obj.update(fields)
+            form.on('submit(form_submitgroup)', function (data) {
+
             });
-            table.on('rowDouble(test)', function (obj) {
-                //obj 同上
+            table.on('row(filter_table_codegroup)', function (obj) {
+                //obj.tr、obj.data
+                table.reload('table_codeitem', {
+                    url: app.contextPath+'/codeitem',
+                    where:{'codegroup.groupId':obj.data.groupId}
+                })
+            });
+            table.on('rowDouble(filter_table_codegroup)', function (obj) {
             });
             //操作栏
             table.on('tool(test)', function (obj) {
@@ -263,12 +246,7 @@
 
             //按钮事件
             var active = {
-                tableAdd: function () {
 
-                },
-                tableRemove: function () {
-
-                }
             };
             //data-method进行按钮绑定
             $('#content-codeitem .layui-btn').on('click', function () {
@@ -276,21 +254,17 @@
                     method = othis.data('method');
                 active[method] ? active[method].call(this, othis) : '';
             });
-            //form
-            form.on('submit(form_submit)', function (data) {
-                alert(1)
-            });
 
-            function openForm(callback) {
+            function openGroupForm(callback) {
                 layer.open({
                     type: 1,
-                    area: ['600px', '500px'],
+                    area: ['600px', '350px'],
                     shade: 0.5,
                     fixed: true,
                     skin: 'custom-layer-class',
                     offset: 'auto',
-                    title: '新增用户',
-                    content: $('#layer_add'),
+                    title: '代码组',
+                    content: $('#layer_addgroup'),
                     btn: ['提交', '重置', '取消'],
                     yes: function (index, layero) {
                         layero.find('form').find('button').trigger('click');
@@ -304,7 +278,6 @@
                         layer.close(index);
                     },
                     success: function (layero, index) {
-                        //form.render(null, 'test1'); // 重置
                         layero.find('form')[0].reset();
                     }
                 });

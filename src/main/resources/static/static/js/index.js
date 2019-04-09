@@ -12,7 +12,7 @@
         app = {
             // main : 'main',
             // dialog :'dialog',
-            // menu : 'menu'
+            menu : 'menu',
             app:'../../../app'
         };
 

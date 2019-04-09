@@ -4,8 +4,8 @@
  *      {id:'',text:'',style:'',cls:'',link:'',children:[]}
  *  ]
  */
-layui.define(['jquery','tool'],function(exports){
-    var $ = layui.jquery,tool = layui.tool;
+layui.define(['element','tool'],function(exports){
+    var $ = layui.$,tool = layui.tool,element = layui.element;
     var menus = [ ];
     var Menu = function(){
         this.render();
@@ -14,9 +14,9 @@ layui.define(['jquery','tool'],function(exports){
         tool.http.ajax({
             url:'/menu/tree',
             method:'get',
-            async:false,
             success:function(res){
                 $('.layui-nav.layui-nav-tree').html(build(res.result));
+                element.render();
             },
         });
     }

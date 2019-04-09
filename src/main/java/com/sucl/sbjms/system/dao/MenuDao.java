@@ -18,6 +18,6 @@ import java.util.List;
 public interface MenuDao extends JpaRepository<Menu,Serializable>,JpaSpecificationExecutor<Menu>,
         org.springframework.data.repository.Repository<Menu,Serializable>{
 
-    @Query(value = "select * from menu LEFT JOIN role_menu rm on rm.menu_code = menu.menu_code where rm.role_code in(?1)",nativeQuery = true)
+    @Query(value = "select * from menu LEFT JOIN role_menu rm on rm.menu_code = menu.menu_code where rm.role_code in(?1) GROUP  BY menu.menu_code",nativeQuery = true)
     List<Menu> getMenusByRoleids(List<String> roleIds);
 }
