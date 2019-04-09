@@ -1,5 +1,7 @@
 package com.sucl.sbjms.core.method.annotation;
 
+import com.sucl.sbjms.core.orm.Domain;
+
 import java.lang.annotation.*;
 
 /**
@@ -11,5 +13,6 @@ import java.lang.annotation.*;
 @Target(ElementType.PARAMETER)
 public @interface QueryCondition {
 
-    Class<?> domain();
+//    Class<?> domain() default Domain.class;
+
 }

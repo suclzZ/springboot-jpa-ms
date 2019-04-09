@@ -6,6 +6,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @Temporal
@@ -29,6 +30,12 @@ public class User implements Domain {
     @JoinColumn(name = "agency_id")
     private Agency agency;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_role",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_code"))
+    private List<Role> roles;
+
     @Column(name = "username",length = 24)
     private String username;
 
@@ -43,6 +50,9 @@ public class User implements Domain {
 
     @Column(name = "age",length = 3)
     private String age;
+
+    @Column(name = "birthday",length = 20)
+    private String birthday;
 
     @Column(name = "telephone",length = 16)
     private String telephone;

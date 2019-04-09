@@ -82,7 +82,7 @@ public class UserDaoTest extends Test {
 //        conds.add(new JpaCondition("agency.agencyId","3"));
 //        conds.add(new JpaCondition("agency.agencyCode","003"));
 //        conds.add(new JpaCondition("agency.company.companyId","c2"));// 二级关联查询，还没解决
-        List<User> users = userService.getAll(conds);
+        List<User> users = userService.getAll2(conds);
         System.out.println(users);
     }
 
@@ -94,7 +94,7 @@ public class UserDaoTest extends Test {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        List<User> users = userService.getAll(conds);
+        List<User> users = userService.getAll2(conds);
         System.out.println(users);
     }
 

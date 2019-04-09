@@ -1,5 +1,7 @@
 package com.sucl.sbjms.core.web;
 
+import com.sucl.sbjms.core.method.annotation.QueryCondition;
+import com.sucl.sbjms.core.method.annotation.QueryOrder;
 import com.sucl.sbjms.core.orm.Condition;
 import com.sucl.sbjms.core.orm.Domain;
 import com.sucl.sbjms.core.orm.Order;
@@ -21,33 +23,33 @@ import java.util.List;
  * @author sucl
  * @date 2019/4/3
  */
-public class BaseController<S extends BaseService<?,T>,T> {
+public abstract class BaseController<S extends BaseService<?,T>,T> {
 
     @Autowired
-    protected S s;
+    protected S service;
 
     @GetMapping("/{id}")
     public T get(@PathVariable String id){
-        return s.getById(id);
+        return service.getById(id);
     }
 
     @GetMapping
     public List<T> getAll(Collection<Condition> conditions){
-        return  s.getAll(conditions);
+        return  service.getAll2(conditions);
     }
 
-    @GetMapping(params = {"pageIndex","pageSize"})
-    public Pager<T> getPager(Pager pager, Collection<Condition> conditions, Collection<Order> orders){
-        return s.getPager(pager,conditions,orders);
+    @GetMapping(params = {"pager:pageIndex","pager:pageSize"})
+    public Pager<T> getPager(Pager pager, @QueryCondition Collection<Condition> conditions,@QueryOrder Collection<Order> orders){
+        return service.getPager(pager,conditions,orders);
     }
 
     @PostMapping
     public T saveOrUpdate(T t){
-        return s.saveOrUpdate(t);
+        return service.saveOrUpdate(t);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable String id){
-        s.deleteById(id);
+        service.deleteById(id);
     }
 }

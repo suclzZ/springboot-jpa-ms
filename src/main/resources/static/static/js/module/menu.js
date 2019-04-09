@@ -11,17 +11,14 @@ layui.define(['jquery','tool'],function(exports){
         this.render();
     };
     Menu.prototype.render = function(data){
-        tool.ajax.send({
-            url:'../data/menu.json',
+        tool.http.ajax({
+            url:'/menu/tree',
             method:'get',
-            async:'false',
+            async:false,
             success:function(res){
-                $('.layui-nav.layui-nav-tree').html(build(res));
+                $('.layui-nav.layui-nav-tree').html(build(res.result));
             },
-            complete:function(){
-
-            }
-        })
+        });
     }
     function build(data){
         var menuHtml = [];

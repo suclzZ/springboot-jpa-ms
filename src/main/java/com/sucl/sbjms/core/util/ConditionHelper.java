@@ -175,7 +175,7 @@ public class ConditionHelper {
      * @return
      */
     public static Sort buildSort(Collection<Order> orders){
-        if(orders!=null || orders.size()>0){
+        if(orders!=null && orders.size()>0){
             List<Sort.Order> sortOrders = new ArrayList<>();
             orders.stream().forEach(o->{
                 Sort.Direction dire = o.getDirection()==null?Sort.DEFAULT_DIRECTION:Sort.Direction.valueOf(o.getDirection());

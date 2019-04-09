@@ -42,15 +42,15 @@ public class ConditionHandlerMethodArgumentResolver implements HandlerMethodArgu
 
     @Override
     public Object resolveArgument(MethodParameter methodParameter, ModelAndViewContainer modelAndViewContainer, NativeWebRequest nativeWebRequest, WebDataBinderFactory webDataBinderFactory) throws Exception {
-        ResolvableType resolvableType = ResolvableType.forMethodParameter(methodParameter);
-        Class<?> domainClazz = resolvableType.getGeneric(0).resolve();
-        Set<String> fieldNames = getDomainProperties(domainClazz);
-        List<FieldClass> fieldClasss = getDomainParamClasss(domainClazz);
+//        ResolvableType resolvableType = ResolvableType.forMethodParameter(methodParameter);
+//        Class<?> domainClazz = resolvableType.getGeneric(0).resolve();
+//        Set<String> fieldNames = getDomainProperties(domainClazz);
+//        List<FieldClass> fieldClasss = getDomainParamClasss(domainClazz);
 
         String conditionJson = nativeWebRequest.getParameter(CONDITIONS);
         if(StringUtils.isNotEmpty(conditionJson)){
             ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readValue(conditionJson,new TypeReference<Collection<Condition>>(){});
+            return objectMapper.readValue(conditionJson, new TypeReference<Collection<JpaCondition>>() { });
         }else{
             return toConditionCollection(nativeWebRequest.getParameterMap());
 //            converToWrapper(parameters, fieldNames,fieldClasss);

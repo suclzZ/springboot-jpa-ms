@@ -6,6 +6,7 @@ import com.sucl.sbjms.core.orm.Pager;
 import com.sucl.sbjms.core.service.BaseService;
 import com.sucl.sbjms.core.util.ConditionHelper;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,6 +26,7 @@ import java.util.List;
  */
 public abstract class BaseServiceImpl<R extends Repository<T,Serializable>,T> implements BaseService<R,T>{
 
+    protected R dao;
     /**
      * 通过examle查询
      */
@@ -38,6 +40,7 @@ public abstract class BaseServiceImpl<R extends Repository<T,Serializable>,T> im
 
     @Resource
     public void setRepository(R r) {
+        this.dao = r;
         if(r instanceof JpaRepository){
             this.repository = (JpaRepository<T, Serializable>) r;
         }
@@ -57,20 +60,26 @@ public abstract class BaseServiceImpl<R extends Repository<T,Serializable>,T> im
     }
 
     @Override
-    public List<T> getAll(Collection<Condition> conditions) {
+    public List<T> getAll2(Collection<Condition> conditions) {
         return specificationExecutor.findAll(ConditionHelper.buildSpecification(conditions));
     }
 
     @Override
     public List<T> getAll(T t) {
+        if(t==null){
+            return repository.findAll();
+        }
         return repository.findAll(Example.of(t));
     }
 
     @Override
     public Pager<T> getPager(Pager pager, Collection<Condition> conditions, Collection<Order> orders) {
-        Pageable pageable = new PageRequest(pager.getPageIndex(),pager.getPageSize(),ConditionHelper.buildSort(orders));
-        specificationExecutor.findAll(ConditionHelper.buildSpecification(conditions),pageable);
-        return null;
+        Pageable pageable = new PageRequest(pager.getPageIndex()-1,pager.getPageSize(),ConditionHelper.buildSort(orders));
+        Page<T> page = specificationExecutor.findAll(ConditionHelper.buildSpecification(conditions), pageable);
+        pager.setMaxPage(page.getTotalPages());
+        pager.setTotal( (int)page.getTotalElements());
+        pager.setResult(page.getContent());
+        return pager;
     }
 
     @Override

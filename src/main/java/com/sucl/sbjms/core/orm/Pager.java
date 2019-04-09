@@ -3,6 +3,7 @@ package com.sucl.sbjms.core.orm;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -11,7 +12,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-public class Pager<T> {
+public class Pager<T> implements Serializable {
     public static final int DEFAULT_PAGESIZE = 15;
     public static final int DEFAULT_PAGEINDEX = 1;
 
@@ -40,7 +41,7 @@ public class Pager<T> {
     }
 
     private void initPage() {
-        this.pageIndex = pageIndex<1?1:pageSize;
+        this.pageIndex = pageIndex<1?1:pageIndex;
         this.pageSart = (pageIndex-1)*pageSize;
         this.pageEnd = pageIndex*pageSize;
     }

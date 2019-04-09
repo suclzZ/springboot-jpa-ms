@@ -17,7 +17,7 @@
             <div class="layui-form-item">
                 <label class="layui-form-label">角色编码</label>
                 <div class="layui-input-block">
-                    <input type="text" name="roleCode" lay-verify="required" autocomplete="off" class="layui-input">
+                    <input type="text" name="roleCode" lay-verify="required" placeholder="角色编码" autocomplete="off" class="layui-input">
                 </div>
             </div>
             <div class="layui-form-item">
@@ -34,26 +34,23 @@
                 </div>
             </div>
             <div class="layui-input-block layui-hide">
-                <button class="layui-btn" lay-submit lay-filter="form_submit">立即提交</button>
+                <button class="layui-btn" lay-submit lay-filter="form_submit"></button>
                 <!--<button id="btn_form_add_reset" type="reset" class="layui-btn layui-btn-primary">重置</button>-->
             </div>
         </form>
     </div>
     <div class="layui-form">
-        <form class="layui-form" action="">
+        <!--<form class="layui-form">-->
             <div class="layui-form-item">
                 <div class="layui-inline">
-                    <input type="text" name="title" required lay-verify="required" placeholder="请输入标题"
-                        autocomplete="off" class="layui-input">
+                    <input type="text" name="roleName" operate="LIKE" lay-verify="required" placeholder="请输入角色名称" autocomplete="off" class="layui-input">
                 </div>
-                <button class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="search"><i
-                        class="layui-icon layui-icon-search"></i>搜索</button>
+                <button class="layui-btn layui-btn-normal layui-btn-sm" data-method="search"><i class="layui-icon layui-icon-search"></i>搜索</button>
             </div>
-        </form>
+        <!--</form>-->
         <table id="table_role" lay-filter="filter_table_role" class="layui-table" lay-skin="line"></table>
         <script type="text/html" id="toolbar">
-            <a class="layui-btn layui-btn-normal  layui-btn-sm" lay-event="add"><i
-                    class="layui-icon layui-icon-add-1"></i>添加</a>
+            <a class="layui-btn layui-btn-normal  layui-btn-sm" lay-event="add"><i class="layui-icon layui-icon-add-1"></i>添加</a>
         </script>
         <script type="text/html" id="optbar">
             <a class="layui-icon layui-icon-edit" lay-event="edit"></a>
@@ -64,48 +61,120 @@
 <script src="../static/layui/layui.js" type="text/javascript" charset="utf-8"></script>
 <script src="../static/js/index.js" data-main="main" type="text/javascript" charset="utf-8"></script>
 <script>
-    layui.use(['layer','table','form'], function() {
-        var layer = layui.layer ,table =layui.table ,form = layui.form ,$=layui.$;
+    layui.use(['layer','table','form','main','app','tool'], function() {
+        var layer = layui.layer ,table =layui.table ,form = layui.form ,$=layui.$,main = layui.main,app=layui.app,tool=layui.tool;
 
         //列表加载数据
-        table.render({
+        var tableIns = table.render({
             elem:'#table_role',
             toolbar:'#toolbar',
             cols:[[
                 {type: 'checkbox', fixed: 'left'},
                 {field:'roleCode', title:'角色编码'},
                 {field:'roleName', title:'角色姓名'},
-                {field:'roleCaption', title:'角色描述'},
+                {field:'description', title:'角色描述'},
                 {toolbar:'#optbar', title:'操作'}
             ]],
-            url:'../data/role.json',
+            url:app.contextPath+'/role',
             page:true,
             limit:8,
             limits:8,
+            request: {
+                pageName: 'pager:pageIndex', //页码的参数名称，默认：page
+                limitName: 'pager:pageSize' //每页数据量的参数名，默认：limit
+            },
+            response: {
+                // statusName: 'status', //规定数据状态的字段名称，默认：code
+                statusCode: 'OK', //规定成功的状态码，默认：0
+                // msgName: 'hint', //规定状态信息的字段名称，默认：msg
+                // countName: 'total', //规定数据总数的字段名称，默认：count
+                // dataName: 'rows', //规定数据列表的字段名称，默认：data
+            },
             parseData: function(res){ //res 即为原始返回的数据
                 return {
-                    "code": res.page.code, //解析接口状态
-                    "msg": res.page.msg, //解析提示文本
-                    "count": res.page.count, //解析数据长度
-                    "data": res.page.data //解析数据列表
+                    "code": res.status, //解析接口状态
+                    "msg": res.info, //解析提示文本
+                    "count": res.result.total, //解析数据长度
+                    "data": res.result.result //解析数据列表
                 };
             }
         });
-                //工具栏
+        //工具栏
         table.on('toolbar(filter_table_role)', function(obj){
             switch(obj.event){
                 case 'add':
-                    // layer.msg('添加');
                     openForm();
-                    // main.addTab('user-add.html');
                     break;
             };
         });
-                function openForm(callback){
+        table.on('row(filter_table_role)', function(obj){
+            //obj.tr、obj.data
+            //obj.del(); obj.update(fields)
+        });
+        table.on('rowDouble(filter_table_role)', function(obj){
+            //obj 同上
+        });
+        //操作栏
+        table.on('tool(filter_table_role)', function(obj){
+            //obj.data、obj.event、obj.tr
+            var layEvent = obj.event;
+            if(layEvent === 'detail'){ //查看
+                //do somehing
+            } else if(layEvent === 'del'){ //删除
+                tool.msg.confirm('确定删除该条数据?', function(index){
+                    obj.del();
+                    layer.close(index);
+                    tool.http.ajax({
+                        url:'/role/'+obj.data.roleCode,
+                        method:'delete',
+                        success:function(){
+                            tool.msg.ok('删除成功！');
+                        }
+                    });
+                });
+            } else if(layEvent === 'edit'){ //编辑
+                openForm();
+                form.val('filter_form_add',obj.data);
+                // obj.update();
+            }
+        });
+
+        //按钮事件
+        var active = {
+            search:function(btn){
+                var conditions = [];
+                $(btn).parent().find('input').each(function(){
+                    conditions.push({property:$(this).attr('name'),value:$(this).val(),operate:$(this).attr('operate')})//
+                });
+                tableIns.reload({
+                    where:{_conditions:JSON.stringify(conditions)}
+                });
+            }
+        };
+        //data-method进行按钮绑定
+        $('#content-role .layui-btn').on('click', function(){
+            var othis = $(this), method = othis.data('method');
+            active[method] ? active[method].call(this, othis) : '';
+        });
+        //form
+        form.on('submit(form_submit)',function (data) {
+            tool.http.ajax({
+                url:'/role',
+                data:data.field,
+                success:function(){
+                    layer.close($(data.form).data('layer-index'));
+                    tableIns.reload();
+                    tool.msg.ok('操作成功！');
+                }
+            })
+            return false;
+        });
+        function openForm(callback){
             layer.open({
                 type: 1,
-                area: ['600px','500px'],
+                area: ['600px','350px'],
                 shade: 0.5,
+                maxmin:true,
                 fixed:true,
                 skin:'custom-layer-class',
                 offset: 'auto',
@@ -124,7 +193,6 @@
                     layer.close(index);
                 },
                 success : function(layero, index){
-                    //form.render(null, 'test1'); // 重置
                     layero.find('form')[0].reset();
                 }
             });
