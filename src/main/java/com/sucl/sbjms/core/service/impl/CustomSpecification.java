@@ -79,6 +79,7 @@ public class CustomSpecification<T> implements Specification {
         if(isRelateProperty(cond)){
             Class clazz = getRelationClazz(root,cond);
             Root relRoot = criteriaBuilder.createQuery(clazz).from(clazz);
+//            relRoot.fetch()
             if(clazz !=null){
                 String relTable = clazz.getSimpleName().toLowerCase();
                 Join join;
@@ -157,6 +158,7 @@ public class CustomSpecification<T> implements Specification {
 
     private Predicate compare(Path path,Condition.Opt operate,Object value,CriteriaBuilder criteriaBuilder){
         Predicate predicate = null;
+        ExpressionValueFormater evf = new ExpressionValueFormater();
         if(value!=null){
             switch (operate){
                 case EQ:

@@ -4,7 +4,7 @@
  *      {id:'',text:'',style:'',cls:'',link:'',children:[]}
  *  ]
  */
-layui.define(['element','tool'],function(exports){
+layui.use(['element','tool'],function(exports){
     var $ = layui.$,tool = layui.tool,element = layui.element;
     var menus = [ ];
     var Menu = function(){
@@ -38,5 +38,6 @@ layui.define(['element','tool'],function(exports){
         }
         return menuHtml.join('');
     }
-    exports('menu',new Menu)
+    new Menu();
+    // exports('menu',new Menu)
 });

@@ -32,6 +32,60 @@ layui.define(['layer','app'], function (exports) {
                     return div.innerHTML;
                 }
             },
+            object:{
+                //
+                objConvert : function(obj){
+                    if(obj && $.type(obj) == 'object'){
+                        return this.reBuildObj(obj);
+                    }
+                    return obj
+                },
+                reBuildObj:function (obj,prefix){
+                    var elem = {},prefix = prefix||'';
+                    if($.type(obj) == 'object'){
+                        for(var p in obj){
+                            var _elem = this.reBuildObj(obj[p],prefix+'.'+p);
+                            $.extend(elem,_elem);
+                        }
+                    }else{
+                        prefix && (elem[prefix.substring(prefix.indexOf('.')+1)]=obj)
+                        //   prefix &&( prefix.indexOf('.')==0?(elem[prefix.substring(1)] = obj): (elem[prefix] = obj));
+                    }
+                    return elem;
+                },
+                /**
+                 * springmvc list接收数据类型prop[0].ele=格式
+                 * {a:'1',b:{name:'zs'},c:[{x:'11',y:'22'}],d:['x','y']} ->
+                 * {a:'1',b.name:'zs},c[0].x:'11',c[0].y:'22',d[0]:'x',d[1]:'y'}
+                 * @param obj
+                 */
+                param:function(obj){
+                    var param = {};
+                    if(typeof obj == 'object'){
+                        for(var p in obj){
+                            var v = obj[p];
+                            if($.type(v) == 'string' ||$.type(v) == 'number'){//{a:1,b:2}
+                                param[p] = obj[p];
+                            }else if($.type(v) == 'object'){//{a:{name:''},b:{name:''}}
+                                for(var p1 in v){
+                                    param[p+'.'+p1] = v[p1];
+                                }
+                            }else if($.type(v) == 'array'){
+                                if($.type(v[0])=='string'||$.type(v) == 'number'){
+                                    param[p+'['+i+']'] = v[i];
+                                }else if($.type(v[0])=='object'){
+                                    for(var i in v){
+                                        for(var p2 in v[i]){
+                                            param[p+'['+i+'].'+p2] = v[i][p2];
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return param;
+                }
+            },
             msg:{
                 alert:function(info){
                     layer.alert(info);
@@ -40,7 +94,7 @@ layui.define(['layer','app'], function (exports) {
                     layer.msg(info,{icon:1,offset: 't'});
                 },
                 warn:function (info) {
-                    layer.msg(info,{icon:7});
+                    layer.msg(info,{icon:7,offset: 't'});
                 },
                 err:function (info) {
                     layer.msg(info,{icon:2});

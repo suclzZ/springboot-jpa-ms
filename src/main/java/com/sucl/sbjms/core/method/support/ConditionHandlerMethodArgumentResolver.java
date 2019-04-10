@@ -61,7 +61,11 @@ public class ConditionHandlerMethodArgumentResolver implements HandlerMethodArgu
         Collection<Condition> conditions = new ArrayList<>();
         if(MapUtils.isNotEmpty(parameterMap)){
             for(Map.Entry<String,String[]> entry : parameterMap.entrySet()){
-                ((ArrayList<Condition>) conditions).add(new JpaCondition(entry.getKey(),entry.getValue()));
+                Object value = entry.getValue();
+                if(value instanceof String[]){
+                    value = ((String[])value)[0];
+                }
+                ((ArrayList<Condition>) conditions).add(new JpaCondition(entry.getKey(),value));
             }
         }
         return conditions;

@@ -18,4 +18,5 @@ public class UserServiceImpl extends BaseServiceImpl<UserDao,User> implements Us
     protected Class<User> getDomainClazz() {
         return User.class;
     }
+
 }

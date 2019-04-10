@@ -12,7 +12,7 @@
         app = {
             // main : 'main',
             // dialog :'dialog',
-            menu : 'menu',
+            // menu : 'menu',
             app:'../../../app'
         };
 
@@ -39,5 +39,5 @@
 
     layui.config({
         base: '../static/js/module/'
-    }).extend(app).use('menu').use(entry);
+    }).extend(app).use(entry);
 })();

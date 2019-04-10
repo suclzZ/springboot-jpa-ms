@@ -39,6 +39,34 @@
             </div>
         </form>
     </div>
+    <div id="layer_authc" class="layui-card" style="display: none">
+        <form class="layui-form layui-card-body" lay-filter="filter_form_authc">
+            <div class="layui-form-item">
+                <label class="layui-form-label">角色编码</label>
+                <div class="layui-input-block">
+                    <input type="text" name="roleCode" readonly  placeholder="角色编码" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">角色户名</label>
+                <div class="layui-input-block">
+                    <input type="text" name="roleName" readonly  placeholder="角色户名" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item layui-form-text">
+                <fieldset class="layui-elem-field">
+                    <legend>菜单</legend>
+                    <div class="layui-field-box">
+                        <div class="layui-input-block" style="display: grid" id="field_menu">
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="layui-input-block layui-hide">
+                <button class="layui-btn" lay-submit lay-filter="form_submit_authc"></button>
+            </div>
+        </form>
+    </div>
     <div class="layui-form">
         <!--<form class="layui-form">-->
             <div class="layui-form-item">
@@ -53,16 +81,17 @@
             <a class="layui-btn layui-btn-normal  layui-btn-sm" lay-event="add"><i class="layui-icon layui-icon-add-1"></i>添加</a>
         </script>
         <script type="text/html" id="optbar">
-            <a class="layui-icon layui-icon-edit" lay-event="edit"></a>
-            <a class="layui-icon layui-icon-delete" lay-event="del"></a>
+            <a class="layui-icon layui-icon-edit" lay-event="edit" title="修改"></a>
+            <a class="layui-icon layui-icon-delete" lay-event="del" title="删除"></a>
+            <a class="layui-icon layui-icon-auz" lay-event="authc" title="菜单授权"></a>
         </script>
     </div>
 </div>
 <script src="../static/layui/layui.js" type="text/javascript" charset="utf-8"></script>
 <script src="../static/js/index.js" data-main="main" type="text/javascript" charset="utf-8"></script>
 <script>
-    layui.use(['layer','table','form','main','app','tool'], function() {
-        var layer = layui.layer ,table =layui.table ,form = layui.form ,$=layui.$,main = layui.main,app=layui.app,tool=layui.tool;
+    layui.use(['layer','table','form','main','app','tool','atree'], function() {
+        var layer = layui.layer ,table =layui.table ,form = layui.form ,$=layui.$,main = layui.main,app=layui.app,tool=layui.tool,atree=layui.atree;
 
         //列表加载数据
         var tableIns = table.render({
@@ -108,8 +137,7 @@
             };
         });
         table.on('row(filter_table_role)', function(obj){
-            //obj.tr、obj.data
-            //obj.del(); obj.update(fields)
+            $(obj.tr).addClass('layui-table-selected').siblings().removeClass('layui-table-selected');
         });
         table.on('rowDouble(filter_table_role)', function(obj){
             //obj 同上
@@ -135,7 +163,9 @@
             } else if(layEvent === 'edit'){ //编辑
                 openForm();
                 form.val('filter_form_add',obj.data);
-                // obj.update();
+            } else if(layEvent === 'authc'){
+                openAuthcForm();
+                form.val('filter_form_authc',obj.data);
             }
         });
 
@@ -190,6 +220,67 @@
                     return false;
                 },
                 btn3:function (index, layero) {
+                    layer.close(index);
+                },
+                success : function(layero, index){
+                    layero.find('form')[0].reset();
+                }
+            });
+        }
+        function openAuthcForm(callback){
+            tool.http.ajax({
+                url:'/menu/tree',
+                method:'get',
+                success:function (res) {
+                    layui.atree({
+                        elem: '#field_menu', //指定元素
+                        check: 'checkbox', //勾选风格
+                        skin: 'as', //设定皮肤
+                        spreadAll:true,
+                        props:{
+                            addBtnLabel:'新增',
+                            deleteBtnLabel:'删除',
+                            name: 'name',
+                            id: 'id',
+                            children:'children',
+                            checkbox:'checkbox',
+                            spread:'spread'
+                        },
+                        change:function(val){
+                        },
+                        click: function(item) { //点击节点回调
+                        },
+                        addClick:function(item,elem,add){
+                            var item ={
+                                name: '测试节点'+new Date().getTime(),
+                                id:-1
+                            }
+                            add(item)
+                        },
+                        deleteClick:function(item,elem,done){
+                            done();
+                        },
+                        nodes:res.result
+                    });
+                }
+            })
+
+            layer.open({
+                type: 1,
+                area: ['600px','500px'],
+                shade: 0.5,
+                maxmin:true,
+                fixed:true,
+                skin:'custom-layer-class',
+                offset: 'auto',
+                title:'授权',
+                content:$('#layer_authc'),
+                btn:['提交','取消'],
+                yes :function(index, layero){
+                    layero.find('form').find('button').trigger('click');
+                    layero.find('form').data('layer-index',index);
+                },
+                btn2:function (index, layero) {
                     layer.close(index);
                 },
                 success : function(layero, index){

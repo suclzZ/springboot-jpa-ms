@@ -81,6 +81,43 @@
         </div>
     </form>
     </div>
+    <div id="layer_authc" class="layui-card" style="display: none">
+        <form class="layui-form layui-card-body" lay-filter="filter_form_authc">
+            <div class="layui-form-item layui-hide">
+                <label class="layui-form-label">ID</label>
+                <div class="layui-input-block">
+                    <input type="text" name="userId" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">登录名</label>
+                <div class="layui-input-block">
+                    <input type="text" name="username" readonly  placeholder="登录名" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">用户名</label>
+                <div class="layui-input-block">
+                    <input type="text" name="userCaption" readonly  placeholder="用户名" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item layui-form-text">
+                <fieldset class="layui-elem-field">
+                    <legend>角色</legend>
+                    <div class="layui-field-box">
+                        <div class="layui-input-block" style="display: grid" id="field_role">
+                            <!--<input type="checkbox" name="roles.roleCode" lay-skin="primary" title="写作" checked="">-->
+                            <!--<input type="checkbox" name="like1[read]" lay-skin="primary" title="阅读">-->
+                            <!--<input type="checkbox" name="like1[game]" lay-skin="primary" title="游戏" disabled="">-->
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="layui-input-block layui-hide">
+                <button class="layui-btn" lay-submit lay-filter="form_submit_authc"></button>
+            </div>
+        </form>
+    </div>
     <div class="layui-form">
         <!--<form class="layui-form">-->
             <div class="layui-form-item">
@@ -107,10 +144,12 @@
         </table>
         <script type="text/html" id="toolbar">
             <a class="layui-btn layui-btn-normal  layui-btn-sm" lay-event="add"><i class="layui-icon layui-icon-add-1"></i>添加</a>
+            <!--<a class="layui-btn layui-btn-normal  layui-btn-sm" lay-event="authc"><i class="layui-icon layui-icon-auz"></i>授权</a>-->
         </script>
         <script type="text/html" id="optbar">
-            <a class="layui-icon layui-icon-edit" lay-event="edit"></a>
-            <a class="layui-icon layui-icon-delete" lay-event="del"></a>
+            <a class="layui-icon layui-icon-edit" lay-event="edit" title="修改"></a>
+            <a class="layui-icon layui-icon-delete" lay-event="del" title="删除"></a>
+            <a class="layui-icon layui-icon-auz" lay-event="authc" title="角色授权"></a>
         </script>
     </div>
 </div>
@@ -122,6 +161,7 @@
 
         //列表加载数据
         var tableIns = table.render({
+            id:'table_user',
             elem:'#table_user',
             toolbar:'#toolbar',
             cols:[[
@@ -138,7 +178,6 @@
             url:app.contextPath+'/user',
             page:true,
             limit:8,
-            limits:8,
             request: {
                 pageName: 'pager:pageIndex', //页码的参数名称，默认：page
                 limitName: 'pager:pageSize' //每页数据量的参数名，默认：limit
@@ -165,11 +204,16 @@
                 case 'add':
                     openForm();
                     break;
+                case 'authc':
+                    var checkStatus = table.checkStatus('table_user');
+                    console.log(checkStatus.data)
+                    openAuthcForm();
             };
         });
+        //行点击
         table.on('row(filter_table_user)', function(obj){
-            //obj.tr、obj.data
-            //obj.del(); obj.update(fields)
+            //obj.tr、obj.data obj.del(); obj.update(fields)
+            $(obj.tr).addClass('layui-table-selected').siblings().removeClass('layui-table-selected');
         });
         table.on('rowDouble(filter_table_user)', function(obj){
             //obj 同上
@@ -179,7 +223,6 @@
             //obj.data、obj.event、obj.tr
             var layEvent = obj.event;
             if(layEvent === 'detail'){ //查看
-                //do somehing
             } else if(layEvent === 'del'){ //删除
                 tool.msg.confirm('确定删除该条数据?', function(index){
                     obj.del();
@@ -195,7 +238,21 @@
             } else if(layEvent === 'edit'){ //编辑
                 openForm();
                 form.val('filter_form_add',obj.data);
-                // obj.update();
+            } else if(layEvent === 'authc'){
+                openAuthcForm();
+                tool.http.ajax({
+                    url:'/user/'+obj.data.userId+'?initialize=roles&initialize=agency',
+                    method:'get',
+                    success:function(res){
+                        form.val('filter_form_authc',res.result);
+                        var roleCodes = res.result.roles.map(r=>r.roleCode);
+                        $('#field_role').find('input').each(function(){
+                            if(roleCodes.indexOf($(this).val())>-1){
+                                $(this).attr("checked", true);
+                            }
+                        });
+                    }
+                })
             }
         });
 
@@ -229,6 +286,25 @@
             })
             return false;
         });
+        form.on('submit(form_submit_authc)',function (data) {
+            var roles = [];
+            $('#field_role').find('input:checked').each(function(){
+                var role = {};
+                role[$(this).attr('name')] = $(this).val();
+                roles.push(role);
+            })
+            $.extend(data.field,{roles:roles});
+            tool.http.ajax({
+                url:'/user/authc',
+                data:tool.object.param( data.field),
+                success:function(){
+                    layer.close($(data.form).data('layer-index'));
+                    tableIns.reload();
+                    tool.msg.ok('操作成功！');
+                }
+            })
+            return false;
+        });
         function openForm(callback){
             layer.open({
                 type: 1,
@@ -254,6 +330,42 @@
                 },
                 success : function(layero, index){
                     //form.render(null, 'test1'); // 重置
+                    layero.find('form')[0].reset();
+                }
+            });
+        }
+        function openAuthcForm() {
+            //初始化角色
+            tool.http.ajax({
+                url:'/role',
+                method:'get',
+                success:function (res) {
+                    var opts = [];
+                    for(i in res.result){
+                        opts.push('<input type="checkbox" name="roleCode" value="'+res.result[i].roleCode+'" lay-skin="primary" title="'+res.result[i].roleName+'">');
+                    }
+                    $('#field_role').html(opts.join(''))
+                }
+            })
+            layer.open({
+                type: 1,
+                area: ['600px', '500px'],
+                shade: 0.5,
+                maxmin: true,
+                fixed: true,
+                skin: 'custom-layer-class',
+                offset: 'auto',
+                title: '授权',
+                content: $('#layer_authc'),
+                btn: ['提交', '取消'],
+                yes: function (index, layero) {
+                    layero.find('form').find('button').trigger('click');
+                    layero.find('form').data('layer-index', index);
+                },
+                btn2: function (index, layero) {
+                    layer.close(index);
+                },
+                success: function (layero, index) {
                     layero.find('form')[0].reset();
                 }
             });

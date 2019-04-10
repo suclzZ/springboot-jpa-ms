@@ -18,6 +18,8 @@ public interface BaseService<R ,T> {
 
     T getOne(String property,Object value);
 
+    T getInitializeObject(Serializable id, String[] props);
+
     List<T> getAll2(Collection<Condition> conditions);
 
     List<T> getAll(T t);

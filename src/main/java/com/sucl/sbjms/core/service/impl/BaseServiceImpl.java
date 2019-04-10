@@ -5,6 +5,9 @@ import com.sucl.sbjms.core.orm.Order;
 import com.sucl.sbjms.core.orm.Pager;
 import com.sucl.sbjms.core.service.BaseService;
 import com.sucl.sbjms.core.util.ConditionHelper;
+import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,6 +18,7 @@ import org.springframework.data.repository.Repository;
 
 import javax.annotation.Resource;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
 
@@ -57,6 +61,36 @@ public abstract class BaseServiceImpl<R extends Repository<T,Serializable>,T> im
     @Override
     public T getOne(String property, Object value) {
         return repository.findOne(ConditionHelper.buildExample(getDomainClazz(),property,value));
+    }
+
+    @Override
+    public T getInitializeObject(Serializable id, String[] props) {
+        T t = getById(id);
+        initializeObjectCollections(t, props);
+        return t;
+    }
+
+    private void initializeObjectCollections(T initializeObject, String[] props) {
+        if(props!=null){
+            for(String prop : props){
+                initializeObjectCollection(initializeObject, prop);
+            }
+        }
+    }
+
+    private void initializeObjectCollection(T initializeObject, String prop) {
+        try {
+            if(StringUtils.isNotEmpty(prop)){
+                PropertyUtils.getProperty(initializeObject,prop);
+                Hibernate.initialize(initializeObject);
+            }
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

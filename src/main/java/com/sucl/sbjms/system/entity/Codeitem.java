@@ -16,7 +16,7 @@ import javax.persistence.*;
 public class Codeitem implements Domain {
 
     @Id
-    @Column(name = "itemId",length = 36)
+    @Column(name = "item_id",length = 36)
     @GenericGenerator(name = "uuid",strategy = "uuid")
     @GeneratedValue(generator = "uuid")
     private String itemId;
