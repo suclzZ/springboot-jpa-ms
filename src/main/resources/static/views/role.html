@@ -92,7 +92,7 @@
 <script>
     layui.use(['layer','table','form','main','app','tool','atree'], function() {
         var layer = layui.layer ,table =layui.table ,form = layui.form ,$=layui.$,main = layui.main,app=layui.app,tool=layui.tool,atree=layui.atree;
-
+        var atree;
         //列表加载数据
         var tableIns = table.render({
             elem:'#table_role',
@@ -164,7 +164,14 @@
                 openForm();
                 form.val('filter_form_add',obj.data);
             } else if(layEvent === 'authc'){
-                openAuthcForm();
+                openAuthcForm(function (atree) {
+                    var menus = obj.data.menus || [];
+                    var mids = menus.map(function (el) {
+                        return el.menuCode;
+                    })
+                    atree.checkItem(mids);
+                });
+                var menus = obj.data.menus;//如果没有加载出来，需要到后台重新查询
                 form.val('filter_form_authc',obj.data);
             }
         });
@@ -194,6 +201,18 @@
                 success:function(){
                     layer.close($(data.form).data('layer-index'));
                     tableIns.reload();
+                    tool.msg.ok('操作成功！');
+                }
+            })
+            return false;
+        });
+        form.on('submit(form_submit_authc)',function (data) {
+            console.log(atree.checkVal())
+            tool.http.ajax({
+                url:'/role/authc',
+                data:data.field,
+                success:function(){
+                    layer.close($(data.form).data('layer-index'));
                     tool.msg.ok('操作成功！');
                 }
             })
@@ -232,14 +251,14 @@
                 url:'/menu/tree',
                 method:'get',
                 success:function (res) {
-                    layui.atree({
+                    atree = layui.atree({
                         elem: '#field_menu', //指定元素
                         check: 'checkbox', //勾选风格
                         skin: 'as', //设定皮肤
                         spreadAll:true,
                         props:{
-                            addBtnLabel:'新增',
-                            deleteBtnLabel:'删除',
+                            // addBtnLabel:'新增',
+                            // deleteBtnLabel:'删除',
                             name: 'name',
                             id: 'id',
                             children:'children',
@@ -250,18 +269,9 @@
                         },
                         click: function(item) { //点击节点回调
                         },
-                        addClick:function(item,elem,add){
-                            var item ={
-                                name: '测试节点'+new Date().getTime(),
-                                id:-1
-                            }
-                            add(item)
-                        },
-                        deleteClick:function(item,elem,done){
-                            done();
-                        },
                         nodes:res.result
                     });
+                    callback.call(this,atree);
                 }
             })
 
