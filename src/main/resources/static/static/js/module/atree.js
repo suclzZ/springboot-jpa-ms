@@ -333,10 +333,14 @@ layui.define('jquery', function(exports) {
       //   setCheck(parent, item.$parent, type);
       //   setAllPatentCheck(parent, item.$parent, type);
       // }
-      if(item.$parent && (!atLestOneCheck && !type)) {
-          setCheck(parent, item.$parent, type,true);
-          setAllPatentCheck(parent, item.$parent, type);
-      }
+        if(item.$parent && atLestOneCheck){
+            setCheck(parent, item.$parent, true,!isChildrenCheck);
+            setAllPatentCheck(parent, item.$parent, true);
+        }
+        // if(item.$parent && !atLestOneCheck && !type){
+        //     setCheck(parent, item.$parent, type);
+        //     setAllPatentCheck(parent, item.$parent, type);
+        // }
     }
 
     //设置节点选中状态

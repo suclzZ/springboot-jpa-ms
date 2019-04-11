@@ -165,13 +165,12 @@
                 form.val('filter_form_add',obj.data);
             } else if(layEvent === 'authc'){
                 openAuthcForm(function (atree) {
-                    var menus = obj.data.menus || [];
+                    var menus = obj.data.menus || [];//如果没有加载出来，需要到后台重新查询
                     var mids = menus.map(function (el) {
                         return el.menuCode;
                     })
                     atree.checkItem(mids);
                 });
-                var menus = obj.data.menus;//如果没有加载出来，需要到后台重新查询
                 form.val('filter_form_authc',obj.data);
             }
         });
@@ -207,12 +206,17 @@
             return false;
         });
         form.on('submit(form_submit_authc)',function (data) {
-            console.log(atree.checkVal())
+            var menus = [];
+            atree.checkVal().forEach(function(item,i){
+                menus.push({menuCode:item.id});
+            })
+            $.extend(data.field,{menus:menus})
             tool.http.ajax({
                 url:'/role/authc',
-                data:data.field,
+                data:tool.object.param(data.field),
                 success:function(){
                     layer.close($(data.form).data('layer-index'));
+                    tableIns.reload();
                     tool.msg.ok('操作成功！');
                 }
             })

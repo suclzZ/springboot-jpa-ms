@@ -25,7 +25,7 @@ public class Role implements Domain {
     @Column(name = "description",length = 256)
     private String description;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY,cascade = CascadeType.REFRESH)
     @JoinTable(name = "role_menu",
             joinColumns = @JoinColumn(name = "role_code"),
             inverseJoinColumns = @JoinColumn(name = "menu_code"))
