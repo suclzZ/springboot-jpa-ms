@@ -18,6 +18,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
  * AbstractHttpMessageConverter->addDefaultHeaders->getContentLength
  */
 //@ControllerAdvice
+@Deprecated
 public class ResponseAdvisor implements ResponseBodyAdvice<Object> {
 
     @Override

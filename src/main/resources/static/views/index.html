@@ -36,17 +36,29 @@
             </ul>
             <ul class="layui-nav layui-layout-right" lay-filter="rightNav">
                 <li class="layui-nav-item">
-                    <a href="javascript:;" data-url="email.html" data-id='4' data-text="系统消息"><i
-                            class="iconfont icon-comment-lines"></i></a>
+                    <a href="javascript:;" id="nav-msg" data-id='4' data-text="系统消息">
+                        <i class="layui-icon layui-icon-notice"></i>
+                    </a>
+                    <div class="layui-card tooltip-card layui-anim-upbit">
+                        <i class="arrow iconfont icon-sort-up"></i>
+                        <div class="layui-card-header"><i class="layui-icon layui-icon-notice"></i>消息
+                            <i class="close layui-icon layui-icon-close"></i>
+                        </div>
+                        <div class="layui-card-body">
+                            这是一条消息<br>
+                            这是第二条消息<br>
+
+                        </div>
+                    </div>
                 </li>
                 <li class="layui-nav-item">
-                    <a href="javascript:;" data-url="email.html" data-id='4' data-text="邮件系统"><i
-                            class="iconfont icon-mail"></i></a>
+                    <a href="javascript:;" data-url="email.html" data-id='4' data-text="邮件系统">
+                        <i class="iconfont icon-mail"></i><span class="layui-badge">6</span></a>
                 </li>
                 <li class="layui-nav-item">
                     <a href="javascript:;" data-url="admin-info.html" data-id='5' data-text="个人信息">管理员</a>
                 </li>
-                <li class="layui-nav-item"><a href="javascript:;">退出</a></li>
+                <li class="layui-nav-item"><a href="login.html">退出</a></li>
             </ul>
         </div>
         <!--内容-->
@@ -72,5 +84,16 @@
 <script src="../static/layui/layui.js" type="text/javascript" charset="utf-8"></script>
 <script src="../static/js/index.js" data-main="main" type="text/javascript" charset="utf-8"></script>
 <script src="../static/js/menu.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    layui.use(['layer'],function(){
+        var layer = layui.layer,$ = layui.$;
+        $('#nav-msg').on('click',function(){
+            $(this).next().toggleClass('layui-show');
+        });
+        $('.layui-card-header').on('click','.close',function(){
+            $(this).closest('.tooltip-card').removeClass('layui-show');
+        });
+    })
+</script>
 </body>
 </html>

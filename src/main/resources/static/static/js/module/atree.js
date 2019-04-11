@@ -382,7 +382,6 @@ layui.define('jquery', function(exports) {
       that.change();
     }
     checkbox.on('click', check);
-
   };
 
   //伸展节点

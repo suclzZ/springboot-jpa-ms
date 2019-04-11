@@ -53,9 +53,15 @@ public abstract class BaseServiceImpl<R extends Repository<T,Serializable>,T> im
         }
     }
 
+    /**
+     * findOne
+     * getOne  代理，你会发现 经常查询出来是个null
+     * @param id
+     * @return
+     */
     @Override
     public T getById(Serializable id) {
-        return repository.getOne(id);
+        return repository.findOne(id);
     }
 
     @Override
@@ -65,7 +71,7 @@ public abstract class BaseServiceImpl<R extends Repository<T,Serializable>,T> im
 
     @Override
     public T getInitializeObject(Serializable id, String[] props) {
-        T t = getById(id);
+        T t = repository.findOne(id);
         initializeObjectCollections(t, props);
         return t;
     }
@@ -81,8 +87,8 @@ public abstract class BaseServiceImpl<R extends Repository<T,Serializable>,T> im
     private void initializeObjectCollection(T initializeObject, String prop) {
         try {
             if(StringUtils.isNotEmpty(prop)){
-                PropertyUtils.getProperty(initializeObject,prop);
-                Hibernate.initialize(initializeObject);
+                Object obj = PropertyUtils.getProperty(initializeObject, prop);
+                Hibernate.initialize(obj);
             }
         } catch (IllegalAccessException e) {
             e.printStackTrace();

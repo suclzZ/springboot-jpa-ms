@@ -1,5 +1,7 @@
 package com.sucl.sbjms.system.entity;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sucl.sbjms.core.orm.Domain;
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
@@ -63,6 +65,7 @@ public class User implements Domain {
     @Column(name = "address",length = 128)
     private String address;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "create_date")
     private Date createDate;
 

@@ -3,10 +3,9 @@ package com.sucl.sbjms.system.web;
 import com.sucl.sbjms.core.web.BaseController;
 import com.sucl.sbjms.system.entity.Menu;
 import com.sucl.sbjms.system.entity.Role;
+import com.sucl.sbjms.system.entity.User;
 import com.sucl.sbjms.system.service.RoleService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -25,4 +24,5 @@ public class RoleController extends BaseController<RoleService,Role> {
         role.setMenus(menus);
         service.save(role);
     }
+
 }

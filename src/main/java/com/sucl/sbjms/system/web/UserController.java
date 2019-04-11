@@ -1,9 +1,13 @@
 package com.sucl.sbjms.system.web;
 
+import com.sucl.sbjms.core.rem.BusException;
+import com.sucl.sbjms.core.service.PasswordService;
 import com.sucl.sbjms.core.web.BaseController;
 import com.sucl.sbjms.system.entity.Role;
 import com.sucl.sbjms.system.entity.User;
 import com.sucl.sbjms.system.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,11 +19,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/user")
 public class UserController extends BaseController<UserService,User> {
-
-    @GetMapping(value = "/{id}",params = {"initialize"})
-    public User getUser(@PathVariable String id,@RequestParam String[] initialize){
-        return service.getInitializeObject(id,initialize);
-    }
+    @Autowired
+    private PasswordService passwordService;
 
     @PostMapping("/authc")
     public void authc(User user){
@@ -27,5 +28,31 @@ public class UserController extends BaseController<UserService,User> {
         user = service.getById(user.getUserId());
         user.setRoles(roles);
         service.save(user);
+    }
+
+    @PostMapping("/resetpasswd")
+    public void resetpasswd(@RequestParam String userId,
+                            @RequestParam  String oldPassword,
+                            @RequestParam String newPassword,
+                            @RequestParam String rePassword){
+        User user = null;
+        if(!StringUtils.isEmpty(userId)){
+            user = service.getById(userId);
+        }
+        if(user==null){
+            throw new BusException(String.format("通过用户id：%s没有找到对应用户！",userId));
+        }
+        if(!StringUtils.isEmpty(oldPassword) && !StringUtils.isEmpty(newPassword) && !StringUtils.isEmpty(rePassword)){
+            boolean match = match = user.getPassword().equals(passwordService.encode(oldPassword));
+            if(!match){
+                throw new BusException("旧密码不正确 ！");
+            }
+            if(newPassword.equals(rePassword)){
+                user.setPassword(passwordService.encode(newPassword));
+                service.save(user);
+            }else{
+                throw new BusException("两次密码不相同！");
+            }
+        }
     }
 }

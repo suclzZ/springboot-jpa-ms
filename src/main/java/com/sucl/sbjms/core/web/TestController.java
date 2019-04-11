@@ -1,5 +1,6 @@
 package com.sucl.sbjms.core.web;
 
+import com.sucl.sbjms.core.rem.BusException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,7 +17,7 @@ public class TestController {
 
     @GetMapping("/a")
     public String a(){
-        return "hello";
+        throw new BusException("hao",new String[]{});
     }
 
     @GetMapping("/b")

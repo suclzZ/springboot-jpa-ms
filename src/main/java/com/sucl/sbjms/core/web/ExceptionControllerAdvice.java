@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 
 /**
+ * 处理contriller抛出的异常
+ * @ExceptionHandler、@InitBinder、@ModelAttribute
  * @author sucl
  * @date 2019/4/10
  */
@@ -19,8 +21,8 @@ public class ExceptionControllerAdvice {
     @Autowired
     private MessageSource messageSource;
 
-    @ExceptionHandler(Exception.class)
     @ResponseBody
+    @ExceptionHandler(Exception.class)
     public Message handler(Exception ex){
 
         return ExceptionUtils.getMessage(ex,messageSource,LocaleContextHolder.getLocale());

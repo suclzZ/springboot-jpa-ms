@@ -97,7 +97,7 @@ layui.define(['layer','app'], function (exports) {
                     layer.msg(info,{icon:7,offset: 't'});
                 },
                 err:function (info) {
-                    layer.msg(info,{icon:2});
+                    layer.msg(info,{icon:2,offset: 't'});
                 },
                 confirm:function (info,callback) {
                     layer.confirm(info, {icon: 3, title:'提示'}, function(index){

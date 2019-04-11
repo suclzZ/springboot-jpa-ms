@@ -9,6 +9,7 @@
         // 配置所有应用的入口文件，程序将会按照data-main属性中设置的值进行索引查找
         // 如果你在引入此脚本的script标签上没有设置data-main属性，程序将会默认访问main.js文件
         // main:{/}main 的意思即代表采用自有路径，即不跟随 base 路径
+        //设置别名
         app = {
             // main : 'main',
             // dialog :'dialog',

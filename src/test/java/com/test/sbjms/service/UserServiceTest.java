@@ -1,4 +1,4 @@
-package com.test.sbjms.dao;
+package com.test.sbjms.service;
 
 import com.sucl.sbjms.core.orm.Condition;
 import com.sucl.sbjms.core.orm.jpa.JpaCondition;
@@ -6,6 +6,7 @@ import com.sucl.sbjms.core.orm.jpa.JpaOrCondition;
 import com.sucl.sbjms.core.orm.jpa.NestedCondition;
 import com.sucl.sbjms.core.service.impl.CustomSpecification;
 import com.sucl.sbjms.system.dao.UserDao;
+import com.sucl.sbjms.system.entity.Role;
 import com.sucl.sbjms.system.entity.User;
 import com.sucl.sbjms.system.service.UserService;
 import com.test.sbjms.Test;
@@ -22,7 +23,7 @@ import java.util.List;
  * @author sucl
  * @date 2019/4/1
  */
-public class UserDaoTest extends Test {
+public class UserServiceTest extends Test {
     @Resource
     private UserDao userDao;
     @Autowired
@@ -30,7 +31,7 @@ public class UserDaoTest extends Test {
 
     @org.junit.Test
     public void test(){
-        t4();
+        t5();
     }
 
     public void t1(){
@@ -98,4 +99,10 @@ public class UserDaoTest extends Test {
         System.out.println(users);
     }
 
+    public void t5(){
+        User user = userService.getById("1");
+        List<Role> roles = user.getRoles();
+        System.out.println(roles);
+        System.out.println(user);
+    }
 }

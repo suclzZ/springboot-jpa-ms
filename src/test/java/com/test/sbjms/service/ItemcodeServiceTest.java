@@ -1,9 +1,8 @@
-package com.test.sbjms.dao;
+package com.test.sbjms.service;
 
 import com.sucl.sbjms.core.orm.Condition;
 import com.sucl.sbjms.core.orm.Pager;
 import com.sucl.sbjms.core.orm.jpa.JpaCondition;
-import com.sucl.sbjms.core.orm.jpa.JpaOrCondition;
 import com.sucl.sbjms.system.entity.Codeitem;
 import com.sucl.sbjms.system.service.CodeitemService;
 import com.test.sbjms.Test;
@@ -11,13 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * @author sucl
  * @date 2019/4/10
  */
-public class ItemcodeDaoTest extends Test {
+public class ItemcodeServiceTest extends Test {
 
     @Autowired
     private CodeitemService codeitemService;

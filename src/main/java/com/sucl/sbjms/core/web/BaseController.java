@@ -7,14 +7,12 @@ import com.sucl.sbjms.core.orm.Domain;
 import com.sucl.sbjms.core.orm.Order;
 import com.sucl.sbjms.core.orm.Pager;
 import com.sucl.sbjms.core.service.BaseService;
+import com.sucl.sbjms.system.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.Repository;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -36,6 +34,11 @@ public abstract class BaseController<S extends BaseService<?,T>,T> {
     @GetMapping("/{id}")
     public T get(@PathVariable String id){
         return service.getById(id);
+    }
+
+    @GetMapping(value = "/{id}",params = {"initialize"})
+    public T get(@PathVariable String id, @RequestParam String[] initialize){
+        return service.getInitializeObject(id, initialize);
     }
 
     /**

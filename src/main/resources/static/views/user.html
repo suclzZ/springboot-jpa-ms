@@ -190,6 +190,9 @@
                 // dataName: 'rows', //规定数据列表的字段名称，默认：data
             },
             parseData: function(res){ //res 即为原始返回的数据
+                if(res.code  == '9999'){
+                    tool.msg.err(res.info);return
+                }
                 return {
                     "code": res.status, //解析接口状态
                     "msg": res.info, //解析提示文本

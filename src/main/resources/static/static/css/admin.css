@@ -29,6 +29,41 @@
 .layui-nav-tree .layui-nav-item a > i {
   margin-right: 5px;
 }
+/*导航*/
+.layui-nav span.layui-badge{
+  margin: -22px 6px 0 -2px;
+  border-radius: 6px;
+}
+.layui-nav .tooltip-card{
+  position: absolute;
+  width: 240px;
+  border: 1px solid #ddd;
+  z-index: 999999;
+  border-radius: 10px;
+  left: -180px;
+  top: 52px;
+  background-color: #fff;
+  color: #14151975;
+  display: none;
+}
+.layui-nav .tooltip-card>.arrow{
+  position: absolute;
+  top: -34px;
+  left: 200px;
+  font-size: 16px;
+  /* border-radius: 4px; */
+  color: #ddd;
+}
+.layui-nav .tooltip-card .close{
+  float:right;
+}
+.layui-nav .tooltip-card .close:hover{
+  cursor:pointer;
+  font-weight: bold;
+}
+.layui-nav .tooltip-card .layui-card-header{
+  text-align: center;
+}
 /**
  表格
  */
@@ -2134,7 +2169,7 @@ logo
 
 .iconfont {
     font-family: "iconfont" !important;
-    font-size: 16px;
+    font-size: 14px;
     font-style: normal;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
