@@ -13,7 +13,7 @@
         app = {
             // main : 'main',
             // dialog :'dialog',
-            // menu : 'menu',
+            // tool:'tool',
             app:'../../../app'
         };
 

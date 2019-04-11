@@ -15,7 +15,7 @@ layui.define([ 'form', 'element','laydate'], function(exports) {
     (function(){
         laydate.render({
             elem: '.layui-date' //指定元素
-            , trigger: 'click'//默认的会出问题，说是必选是focus，然而并不是
+            , trigger: 'click'//默认的会出问题，说是必选是默认focus，然而并不是
         });
     })();
 
